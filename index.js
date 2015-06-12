@@ -20,8 +20,8 @@ module.exports = function(options) {
       if (!list.length) {
         return;
       }
-      var webPath = config.getWebPath(cdp);
       var targetDir = options.target || config.getTargetDir(cdp);
+      var webPath = config.getWebPath(cdp, targetDir);
       var fontName = options.font || config.getFontName();
       var separate = options.separate || '~';
       var cssFilePath = config.getCssPath(cdp);

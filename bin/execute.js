@@ -32,10 +32,10 @@ if (args.dir) {
       if (stat.isDirectory()) {
         ai2font(args);
       } else {
-        console.log('参数1不是一个有效的目录');
+        console.log('无效的目录');
       }
     }
   });
 } else {
-  ai2font();
+  ai2font(args);
 }
