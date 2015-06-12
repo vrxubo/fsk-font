@@ -35,17 +35,3 @@
     getHtmlPath  css文档html存放目录
     getHtmlWebUrl  访问html的URL
     getCssWebUrl   css文件的在线引用URL便于在html中引用
-## svg文件导出格式 ##
-Save your file as SVG with the following settings:
-
-* SVG Profiles: SVG 1.1
-* Fonts Type: SVG
-* Fonts Subsetting: None
-* Options Image Location: Embed
-* Advanced Options
-    * CSS Properties: Presentation Attributes
-    * Decimal Places: 1
-    * Encoding: UTF-8
-    * Output fewer elements: check
-
-请参考[svgicons2svgfont](https://www.npmjs.com/package/svgicons2svgfont)
