@@ -9,6 +9,7 @@ var generateCss = require('./lib/generatecss');
 var generateHtml = require('./lib/generateHtml');
 var config = require('./lib/config');
 var writeFile = require('./lib/writeFile');
+var TTFStream = require('./lib/svg2ttfstream');
 
 module.exports = function(options) {
   options = options || {};
@@ -28,46 +29,42 @@ module.exports = function(options) {
       var htmlFilePath = config.getHtmlPath(cdp);
       var htmlWebUrl = config.getHtmlWebUrl(cdp);
       var cssWebUrl = config.getCssWebUrl(cdp);
+      var mark = config.getMark(cdp);
       var fontFilePath = path.join(targetDir, fontName+'.svg');
       var ttfFilePath = path.join(targetDir, fontName+'.ttf');
       var woffFilePath = path.join(targetDir, fontName+'.woff');
       var eotFilePath = path.join(targetDir, fontName+'.eot');
       writeFile.mkdirs(path.dirname(fontFilePath), function() {
-        svgicons2svgfont(list, {
-          fontName: fontName
-        }).pipe(fs.createWriteStream(fontFilePath)).on('finish',function() {
-          fs.readFile(fontFilePath, 'utf-8',function(err, data) {
-            var ttfcontent = new Buffer(svg2ttf(data, {}).buffer);
-            writeFile(ttfFilePath, ttfcontent, 'utf-8', function(err) {
-              if (!err) {
-                console.log('ttf created.');
-              } else {
-                console.log(err)
-              }
-            });
-            var ttfcontent2 = new Uint8Array(ttfcontent);
-            var woffcontent = new Buffer(ttf2woff(ttfcontent2).buffer);
-            var eotcontent = new Buffer(ttf2eot(ttfcontent2).buffer);
-            writeFile(woffFilePath , woffcontent, 'utf-8', function() {
-              if (!err) {
-                console.log('woff created.');
-              }
-            });
-            writeFile(eotFilePath , eotcontent, 'utf-8', function() {
-              if (!err) {
-                console.log('eot created.');
-              }
-            });
+        var svgStream = svgicons2svgfont(list, {
+          fontName: fontName,
+          normalize: true
+        });
+        svgStream.pipe(fs.createWriteStream(fontFilePath));
+        var ttfStream = svgStream.pipe(new TTFStream({fp: ttfFilePath}));
+        ttfStream.on('end', function(data) {
+          console.log('ttf created.');
+          var ttfcontent = new Uint8Array(data);
+          var woffcontent = new Buffer(ttf2woff(ttfcontent).buffer);
+          var eotcontent = new Buffer(ttf2eot(ttfcontent).buffer);
+          writeFile(woffFilePath , woffcontent, 'utf-8', function() {
+            if (!err) {
+              console.log('woff created.');
+            }
+          });
+          writeFile(eotFilePath , eotcontent, 'utf-8', function() {
+            if (!err) {
+              console.log('eot created.');
+            }
           });
         });
       });
 
       fs.readFile(cssFilePath, 'utf-8', function(err, data) {
-        var cssText = generateCss(fontName, webPath, list);
+        var cssText = generateCss(fontName, webPath, list, mark);
         if (err) {
           data = cssText;
         } else {
-          var reg = /\/\*font\-icon\-start\*\/[\s\S]*\/\*font\-icon\-end\*\//i;
+          var reg = new RegExp('\\/\\*font\\-icon\\-' + (mark?mark+'\\-':'') + 'start\\*\\/[\\s\\S]*\\/\\*font\\-icon\\-' + (mark?mark+'\\-':'') + 'end\\*\\/','i');
           if (!data) {
             data = cssText;
           } else if (reg.test(data)) {
@@ -77,7 +74,7 @@ module.exports = function(options) {
           }
         }
         writeFile(cssFilePath, data, 'utf-8', function(err) {
-          console.log('css created.');
+          console.log('css created.' + cssFilePath);
         });
       });
       writeFile(htmlFilePath, generateHtml(cssWebUrl, list),'utf-8', function(err){
@@ -86,7 +83,7 @@ module.exports = function(options) {
           return ;
         }
         console.log('html created');
-        var c = require('child_process')
+        var c = require('child_process');
         c.exec('start ' + htmlWebUrl);
         console.log(htmlWebUrl);
       });
