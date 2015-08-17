@@ -36,6 +36,21 @@
     getHtmlWebUrl  访问html的URL
     getCssWebUrl   css文件的在线引用URL便于在html中引用
 
+## 兼容老的字体文件 ##
+    为了兼容已有字体文件, 例如原来的css是
+    >.icon {
+    >  content: 'a';
+    >  font-family: custom;
+    >}
+    现在还想content为a, 不影响之前的css,有两种办法可以实现:
+    1 通过文件命名, 将文件命名为:
+    custom~a.svg   或 custom~u0061.svg
+    custom将作为新的class name a会作为新字体的codepoint
+    2 在存放svg文件的目录下创建mapping.json 内容为:
+    >{
+    >  "custom": "a"
+    >}
+
 ## svg文件导出格式 ##
 
 Save your file as SVG with the following settings:

@@ -1,6 +1,6 @@
 {
   "name": "fsk-font",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "将AI导出的svg转换为字体的svg",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
